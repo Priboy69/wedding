@@ -1,0 +1,10 @@
+# Global
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.DS_Store
+**/node_modules
+**/dist
+**/.vite
+**/.env
+server/uploads 
