@@ -1,12 +1,9 @@
 import { Timeline } from './components/Timeline'
 import { QRCodeBlock } from './components/QRCodeBlock'
 import { TelegramShareButton } from './components/TelegramShareButton'
-import { TelegramPostEmbed } from './components/TelegramPostEmbed'
 import { weddingTimeline } from './data/timeline'
 
 const TELEGRAM_LINK = 'https://t.me/+pH6dblq2c99hMGZi'
-// Replace with a real post link like https://t.me/username/123
-const TELEGRAM_POST_URL = 'https://t.me/s/test/1'
 
 export default function App() {
   return (
@@ -39,10 +36,6 @@ export default function App() {
             <p className="note" style={{ marginTop: 12 }}>Поделиться приглашением:</p>
             <div className="tg-share"><TelegramShareButton url={TELEGRAM_LINK} text="Присоединяйтесь к нашему свадебному каналу!" /></div>
           </div>
-        </div>
-        <div style={{ marginTop: 16 }}>
-          <p className="note">Актуальные посты из канала:</p>
-          <TelegramPostEmbed postUrl={TELEGRAM_POST_URL} />
         </div>
       </section>
 
