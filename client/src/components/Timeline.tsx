@@ -2,7 +2,8 @@ import React from 'react'
 
 export type TimelineItem = {
   time?: string
-  text: string
+  text?: string
+  content?: React.ReactNode
 }
 
 export type TimelineDay = {
@@ -20,7 +21,7 @@ export function Timeline({ timeline }: { timeline: TimelineDay[] }) {
             {day.items.map((item, idx) => (
               <li key={idx}>
                 {item.time ? <span className="time">{item.time}</span> : null}
-                <span className="text">{item.text}</span>
+                <span className="text">{item.content ?? item.text}</span>
               </li>
             ))}
           </ul>
