@@ -113,4 +113,19 @@ h2 {
 /* Footer */
 .footer { text-align: center; margin-top: 44px; color: var(--muted); }
 /* footer love text */
-.footer .love { font-family: 'Great Vibes', cursive; font-size: clamp(28px, 5vw, 52px); color: var(--brand); text-shadow: 0 4px 16px rgba(232,106,139,0.25); margin: 0; } 
+.footer .love { font-family: 'Great Vibes', cursive; font-size: clamp(28px, 5vw, 52px); color: var(--brand); text-shadow: 0 4px 16px rgba(232,106,139,0.25); margin: 0; }
+
+/* QR block */
+.qr-block { display: grid; place-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); max-width: 420px; }
+.qr-block h3 { margin: 0; color: var(--brand); }
+
+/* labels & callouts */
+.label-fancy { font-family: 'Great Vibes', cursive; font-size: clamp(26px, 4.5vw, 40px); color: var(--brand); margin: 6px 0 6px; }
+.actions-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.callout { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+.callout .note { margin: 0 0 6px; color: var(--text); }
+.tg-share { margin-top: 8px; }
+
+@media (min-width: 820px) {
+  .actions-row { grid-template-columns: 1fr 1fr; }
+} 
