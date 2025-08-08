@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Request, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from typing import List
 from pathlib import Path
 import shutil
@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Wedding Uploads API", version="1.2.0")
+app = FastAPI(title="Wedding Uploads API", version="1.3.0")
 
 origins = [
     "http://localhost:5173",
@@ -137,4 +137,18 @@ async def download_photos(files: List[str] = Query(default=[])):
         yield from buffer
 
     headers = {"Content-Disposition": 'attachment; filename="wedding-photos.zip"'}
-    return StreamingResponse(stream_zip(), media_type="application/zip", headers=headers) 
+    return StreamingResponse(stream_zip(), media_type="application/zip", headers=headers)
+
+
+@app.get("/photos/file")
+async def download_file(file: str):
+    safe = _safe_filename(file)
+    p = (UPLOAD_DIR / safe).resolve()
+    if not p.is_file() or UPLOAD_DIR not in p.parents:
+        raise HTTPException(status_code=404, detail="File not found")
+    guessed, _ = mimetypes.guess_type(p.name)
+    return FileResponse(
+        str(p),
+        media_type=guessed or "application/octet-stream",
+        filename=p.name,
+    ) 
