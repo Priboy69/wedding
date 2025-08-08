@@ -1,19 +1,21 @@
-from fastapi import FastAPI, UploadFile, File, Request
+from fastapi import FastAPI, UploadFile, File, Request, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from typing import List
 from pathlib import Path
 import shutil
 import time
 import re
 import mimetypes
+import io
+import zipfile
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Wedding Uploads API", version="1.1.0")
+app = FastAPI(title="Wedding Uploads API", version="1.2.0")
 
 origins = [
     "http://localhost:5173",
@@ -104,4 +106,35 @@ async def upload_photos(request: Request, files: List[UploadFile] = File(...)):
             "content_type": content_type,
             "kind": kind,
         })
-    return JSONResponse(saved) 
+    return JSONResponse(saved)
+
+
+@app.get("/photos/download")
+async def download_photos(files: List[str] = Query(default=[])):
+    if not files:
+        raise HTTPException(status_code=400, detail="Specify at least one file")
+
+    # Validate and collect paths
+    selected_paths: List[Path] = []
+    for name in files:
+        # ensure safe name
+        safe = _safe_filename(name)
+        p = (UPLOAD_DIR / safe).resolve()
+        if not p.is_file() or UPLOAD_DIR not in p.parents:
+            continue
+        selected_paths.append(p)
+
+    if not selected_paths:
+        raise HTTPException(status_code=404, detail="No valid files found")
+
+    # Stream ZIP
+    def stream_zip():
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for path in selected_paths:
+                zf.write(path, arcname=path.name)
+        buffer.seek(0)
+        yield from buffer
+
+    headers = {"Content-Disposition": 'attachment; filename="wedding-photos.zip"'}
+    return StreamingResponse(stream_zip(), media_type="application/zip", headers=headers) 
