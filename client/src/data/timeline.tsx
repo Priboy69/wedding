@@ -23,7 +23,7 @@ export const weddingTimeline: TimelineDay[] = [
         time: '12:00',
         content: (
           <>
-            Сбор у ЗАГС в Зеленоградске (
+            Сбор у ЗАГСа в Зеленоградске (
             {link('https://yandex.ru/maps/org/otdel_zags_administratsii_mo_zelenogradskiy_gorodskoy_okrug/1058568608?si=6z5bpuqqe3x47dbdkrea76gqh8', 'г. Зеленоградск, Отдел ЗАГС администрации МО «Зеленоградский городской округ»')}
             , {link('https://yandex.ru/maps/-/CHhUZO67', 'ссылка 2')}
             )
