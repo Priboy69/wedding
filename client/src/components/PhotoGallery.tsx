@@ -6,6 +6,11 @@ function isVideo(p: PhotoMeta) {
   return (p.content_type || '').startsWith('video/')
 }
 
+function isIOS() {
+  if (typeof navigator === 'undefined') return false
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1)
+}
+
 export function PhotoGallery() {
   const [photos, setPhotos] = useState<PhotoMeta[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,12 +69,51 @@ export function PhotoGallery() {
     }
   }
 
+  async function downloadZipSelected() {
+    const files = Object.entries(selected).filter(([, v]) => v).map(([k]) => k)
+    if (files.length === 0) return
+    const params = new URLSearchParams()
+    files.forEach((f) => params.append('files', f))
+    const url = `/photos/download?${params.toString()}`
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'wedding-photos.zip'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+  }
+
+  async function shareSelectedIOS() {
+    const files = Object.entries(selected).filter(([, v]) => v).map(([k]) => k)
+    if (files.length === 0) return
+    try {
+      const blobs: File[] = []
+      for (const name of files) {
+        const meta = photos.find(p => p.filename === name)
+        const res = await fetch(meta?.url || `/uploads/${encodeURIComponent(name)}`)
+        const blob = await res.blob()
+        const file = new File([blob], name, { type: meta?.content_type || blob.type || 'application/octet-stream' })
+        blobs.push(file)
+      }
+      const navAny = navigator as any
+      if (navAny && typeof navAny.share === 'function' && (!navAny.canShare || navAny.canShare({ files: blobs }))) {
+        await navAny.share({ files: blobs, title: 'Свадебные фото/видео' })
+      } else {
+        // fallback to ZIP if share is unavailable
+        await downloadZipSelected()
+      }
+    } catch (e) {
+      console.error('iOS share failed', e)
+      await downloadZipSelected()
+    }
+  }
+
   if (loading) return <p>Загружаем галерею…</p>
   if (error) return <p className="error">{error}</p>
 
   return (
     <div className="gallery">
-      <div className="toolbar" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+      <div className="toolbar" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
         <button className="refresh" onClick={handlePrimaryAction}>
           {selectionMode ? (selectedCount > 0 ? 'Скачать выбранные' : 'Выберите файлы') : 'Скачать выбранные'}
         </button>
@@ -77,6 +121,10 @@ export function PhotoGallery() {
           <>
             <button className="btn" onClick={() => setSelected({})}>Снять выделение</button>
             <button className="btn" onClick={() => { setSelectionMode(false); setSelected({}) }}>Готово</button>
+            <button className="btn" onClick={downloadZipSelected} disabled={selectedCount === 0}>Скачать ZIP</button>
+            {isIOS() && (
+              <button className="btn" onClick={shareSelectedIOS} disabled={selectedCount === 0}>Сохранить в Фото (iOS)</button>
+            )}
             <span className="muted">Выбрано: {selectedCount}</span>
           </>
         )}
