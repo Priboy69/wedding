@@ -50,18 +50,28 @@ export function PhotoGallery() {
   async function downloadSelected() {
     const files = Object.entries(selected).filter(([, v]) => v).map(([k]) => k)
     if (files.length === 0) return
-    // Trigger individual downloads
-    files.forEach((name) => {
+    for (const name of files) {
       const item = photos.find((p: PhotoMeta) => p.filename === name)
-      if (!item) return
-      const a = document.createElement('a')
-      a.href = item.url
-      a.download = item.filename
-      a.target = '_blank'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-    })
+      if (!item) continue
+      try {
+        const res = await fetch(item.url, { mode: 'cors' })
+        if (!res.ok) throw new Error('download failed')
+        const blob = await res.blob()
+        const objectUrl = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = objectUrl
+        a.download = item.filename
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        // give the browser a moment before revoking
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 2000)
+      } catch (e) {
+        console.error('Failed to download', item.filename, e)
+        // fallback: open in new tab
+        window.open(item.url, '_blank')
+      }
+    }
   }
 
   if (loading) return <p>Загружаем галерею…</p>
