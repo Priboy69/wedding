@@ -24,6 +24,15 @@ export default function App() {
         <Timeline timeline={weddingTimeline} />
       </section>
 
+      <section id="ps" style={{ marginTop: 12 }}>
+        <h2>P.S.</h2>
+        <div className="callout">
+          <p className="note">
+            Пожалуйста, возьмите с собой: спальные и плавательные принадлежности (купальник/шорты, сланцы).
+          </p>
+        </div>
+      </section>
+
       <section id="share">
         <h2>Фото и видео гостей</h2>
         <p className="label-fancy">Поделитесь моментами ✨</p>
