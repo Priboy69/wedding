@@ -17,7 +17,7 @@ services:
       context: ./client
       args:
         # Adjust if server runs elsewhere in prod
-        VITE_API_BASE_URL: http://80.74.29.66:8000
+        VITE_API_BASE_URL: https://misha-olya.ru
     container_name: wedding_client
     ports:
       - "5173:80"
